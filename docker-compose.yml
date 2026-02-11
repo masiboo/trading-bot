@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:2.7
+    container_name: trading-influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      INFLUXDB_DB: trading_data
+      INFLUXDB_ADMIN_USER: admin
+      INFLUXDB_ADMIN_PASSWORD: admin123
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    networks:
+      - trading-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  trading-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trading-bot
+    ports:
+      - "8080:8080"
+    environment:
+      INFLUXDB_URL: http://influxdb:8086
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+      INFLUXDB_ORG: admin
+      INFLUXDB_BUCKET: trading_data
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    networks:
+      - trading-network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+volumes:
+  influxdb-data:
+
+networks:
+  trading-network:
+    driver: bridge

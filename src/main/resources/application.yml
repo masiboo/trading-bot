@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: trading-bot
+  quartz:
+    job-store-type: memory
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: TradingBotScheduler
+          threadPool:
+            threadCount: 2
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    root: INFO
+    com.trading: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# InfluxDB Configuration
+influxdb:
+  url: http://localhost:8086
+  token: skbsWjxPoCpQem-jotlwmzYM2wWxllEmMfWStnFDTiCVa-kWhI2zweJ0i9CH-Av8NB1F-CwIbsPsY4xJXXyYBQ==
+  org: admin
+  bucket: trading_data
+  username: admin
+
+# Trading Configuration
+trading:
+  # Risk management parameters
+  risk:
+    daily-loss-limit: 500.0
+    max-position-size: 0.05  # 5% of portfolio per trade
+    max-open-positions: 5
+    stop-loss-percentage: 2.0
+  
+  # Trading parameters
+  trading:
+    enabled: true
+    paper-trading: true  # Set to false for live trading
+    initial-portfolio-value: 10000.0
+  
+  # Supported trading pairs
+  pairs:
+    - BTC_USDT
+    - ETH_USDT
+    - BNB_USDT
+
+# Fiat/Forex API Configuration
+fixer:
+  api-key: ${FIXER_API_KEY:demo}
+  base-url: http://data.fixer.io/api/latest
+
+# AI Model Configuration
+ai:
+  model:
+    path: models/price_predictor.pt
+    enabled: false  # Set to true when model is available
